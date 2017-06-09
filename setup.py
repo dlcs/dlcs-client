@@ -2,7 +2,7 @@ from distutils.core import setup
 setup(
   name = 'dlcs',
   packages = ['dlcs'],
-  version = '0.1',
+  version = '0.2',
   description = 'A simple Python client library for the Digital Library Cloud Services platform from Digirati Ltd',
   author = 'Digirati',
   author_email = 'software@digirati.com',
