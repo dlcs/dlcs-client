@@ -16,3 +16,4 @@ History:
 
 v0.1 initial release
 v0.2 pypi release
+v0.3 fixed pypi metadata
