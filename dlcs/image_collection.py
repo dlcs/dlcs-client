@@ -65,7 +65,7 @@ class ImageCollection(JSONLDBaseWithHydraContext):
     def to_json_dict(self):
 
         data = super(ImageCollection, self).to_json_dict()
-        add_if_not_none(data, 'member', map(lambda x: x.to_json_dict(), self.members))
+        add_if_not_none(data, 'member', list(map(lambda x: x.to_json_dict(), self.members)))
         add_if_not_none(data, 'total_items', self.total_items)
 
         return data
