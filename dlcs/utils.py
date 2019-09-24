@@ -21,11 +21,11 @@ def dict_to_jsonld_friendly(source, mappings=None, excludes=None, lower_case=Tru
     
     Works recursively.
 
-    :param source: input dict
-    :param mappings: list of mappings for keys
-    :param excludes: list of lists for excludes for keys
+    :param source: input
+    :param mappings: list of mappings for keys. Mappings are dicts with {"old_key: "new_key"} pairs.
+    :param excludes: list of lists for excludes for keys, e.g. ["exclude_me", "exclude_me_too"]
     :param lower_case: Boolean, change the key to lower case form of key
-    :return: dict
+    :return: transformed input.
     """
     if excludes:  # merge the list fo excludes into a single list
         exclude = list(itertools.chain.from_iterable(excludes))
