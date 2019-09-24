@@ -73,7 +73,7 @@ class ImageCollection(JSONLDBaseWithHydraContext):
 
 class Image(JSONLDBase):
 
-    def __init__(self, id=None, at_id=None, space=None, origin=None, tags=None, string_1=None, string_2=None, string_3=None, number_1=None, number_2=None, number_3=None):
+    def __init__(self, id=None, at_id=None, space=None, origin=None, tags=None, string_1=None, string_2=None, number_1=None, number_2=None):
         super(Image, self).__init__()
         self.id = id
         self.at_id = at_id
@@ -82,10 +82,8 @@ class Image(JSONLDBase):
         self.tags = tags
         self.string_1 = string_1
         self.string_2 = string_2
-        self.string_3 = string_3
         self.number_1 = number_1
         self.number_2 = number_2
-        self.number_3 = number_3
 
     def to_json_dict(self):
 
@@ -95,10 +93,8 @@ class Image(JSONLDBase):
         add_if_not_none(data, 'tags', self.tags)
         add_if_not_none(data, 'string1', self.string_1, str)
         add_if_not_none(data, 'string2', self.string_2, str)
-        add_if_not_none(data, 'string3', self.string_3, str)
         add_if_not_none(data, 'number1', self.number_1, int)
         add_if_not_none(data, 'number2', self.number_2, int)
-        add_if_not_none(data, 'number3', self.number_3, int)
         return data
 
 
