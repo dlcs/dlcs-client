@@ -1,7 +1,4 @@
 import itertools
-import os
-import csv
-from dlcs.images import make_collection
 
 
 def merge_dicts(*dict_args):
@@ -55,7 +52,7 @@ def dict_to_jsonld_friendly(source, mappings=None, excludes=None, lower_case=Tru
             if mapping:
                 if new_key in mapping.keys():
                     mapped_key = mapping[new_key]
-            if v is not None:  # exclude empty keys
+            if v is not None and v is not "":  # exclude empty keys and empty strings
                 if exclude:
                     if new_key not in exclude:  # if the key isn't explicitly excluded
                         new_dict[mapped_key] = dict_to_jsonld_friendly(
@@ -70,31 +67,4 @@ def dict_to_jsonld_friendly(source, mappings=None, excludes=None, lower_case=Tru
     return new_dict
 
 
-def csv_to_json(csv_file, mappings, excludes):
-    """
-    Helper function to transform a CSV that has been formatted in the way expected by the
-    Portal UI into Collection JSON that can be used via the DLCS APIs.
 
-    :param csv_file:
-    :param mappings: list of mappings for keys. Mappings are dicts with {"old_key: "new_key"} pairs.
-    :param excludes: list of lists for excludes for keys, e.g. ["exclude_me", "exclude_me_too"]
-    :return:
-    """
-    if os.path.exists(csv_file):
-        if os.path.isfile(csv_file):
-            if os.access(csv_file, os.R_OK):  # we have a readable file
-                with open(csv_file) as f:
-                    csv_doc = csv.DictReader(f)
-                    # convert to tuples, and run through the dict transformation
-                    csv_rows = [dict_to_jsonld_friendly(source=dict(d), mappings=mappings,
-                                                        excludes=excludes)
-                                for d in csv_doc]
-                    if csv_rows:
-                        collection = make_collection(members=csv_rows)
-                        if collection:
-                            # this bit is sort of redundant, but we might want to also transform
-                            # some of the keys in the collection dict.
-                            return dict_to_jsonld_friendly(source=collection,
-                                                           mappings=mappings,
-                                                           excludes=excludes)
-    return

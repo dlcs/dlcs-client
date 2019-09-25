@@ -1,9 +1,9 @@
-key_mapping = {"context": "@context", "at_id": "@id", "identifier": "id"}
+key_mapping = {"context": "@context", "at_id": "@id", "identifier": "id", "type": "@type"}
 csv_mapping = {
-    "reference1": "string_1",
-    "reference2": "string_2",
-    "numberreference1": "number_1",
-    "numberreference2": "number_2",
+    "reference1": "string1",
+    "reference2": "string2",
+    "numberreference1": "number1",
+    "numberreference2": "number2",
 }
 csv_excludes = ["line", "maxunauthorised", "type"]
 master_excludes = [csv_excludes]

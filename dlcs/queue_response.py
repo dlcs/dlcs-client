@@ -1,5 +1,8 @@
 from requests import get, auth
-import settings
+import dlcs.settings_local as settings
+from tqdm import tqdm
+import time
+
 
 mapping = {
     '@context': 'context',
@@ -8,6 +11,27 @@ mapping = {
     'errorImages': 'error_images',
     'completedImages': 'completed_images',
 }
+
+
+def batch_progress(dlcs_batch, sleep_interval=10):
+    """
+    Provide a TQDM progress bar for a batch ingest.
+
+    To Do: Add logging.
+
+    :param dlcs_batch: Batch object
+    :param sleep_interval: time to sleep between updates
+    :return: Batch
+    """
+    t = tqdm(total=dlcs_batch.count)
+    while dlcs_batch.finished == "0001-01-01T00:00:00" or not dlcs_batch.is_completed():
+        dlcs_batch.update()
+        processed = dlcs_batch.completed + dlcs_batch.errors
+        t.update(dlcs_batch.completed + dlcs_batch.errors)
+        time.sleep(sleep_interval)
+    t.close()
+    print(f"Processed {processed} of {dlcs_batch.count}, with {dlcs_batch.errors} errors.")
+    return dlcs_batch
 
 
 class Batch:

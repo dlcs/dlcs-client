@@ -1,79 +1,74 @@
 import json
-import requests
-from dlcs.settings import key_mapping
+from dlcs.utils import dict_to_jsonld_friendly
+from dlcs.settings import master_excludes, master_mappings
 
 
-def image_dict(
-    identifier=None,
-    at_id=None,
-    space=None,
-    origin=None,
-    tags=None,
-    string_1=None,
-    string_2=None,
-    number_1=None,
-    number_2=None,
-):
-    """ This is redudant, just here while I check stuff."""
-    # Do stuff here if there's any validation that needs to happen, or transformation.
-    # Otherwise, just return whatever parameters get passed in.
-    return locals()
-
-
-def dict_to_jsonld_friendly(source, mapping, lower_case=True):
+class JsonObject(object):
     """
-    Delete empty keys and replace keys with their appropriate equivalent, e.g.
-    'context' with '@context'.
+    Generic JSON object class, with methods for returning a transformed jsonld friendly dict, or
+    json as a string.
 
-    :param source: input dict
-    :param mapping: mapping for keys
-    :param: lower_case: Boolean, change the key to lower case form of key
-    :return: dict
+    Will set the mappings to settings.master_mappings and the excludes to settings.master_excludes if not otherwise set.
     """
-    if type(source) == list:
-        return [dict_to_jsonld_friendly(x, mapping=mapping) for x in source]
-    elif type(source) == dict:
-        new_dict = {}
-        for k, v in source.items():
-            if lower_case:
-                new_key = k.lower()
+    def __init__(self, *args, **kwargs):
+        vars(self).update(kwargs)
+        if not hasattr(self, "mappings"): # this can be set to None
+            self.mappings = master_mappings
+        if not hasattr(self, "excludes"):  # this can be set to None
+            self.excludes = master_excludes
+        self.clean_dict = {k:v for k,v in self.__dict__.items() if k not in ["excludes", "mappings"]}
+
+
+    def jsonld_friendly(self):
+        """
+        Method will delete empty keys and replace keys with their appropriate equivalent, e.g.
+        'context' with '@context' using the self.mappings parameter.
+
+        Exclude keys that you don't want to appear in the output using the self.excludes parameter.
+        """
+        return dict_to_jsonld_friendly(source=self.clean_dict, mappings=self.mappings, excludes=self.excludes)
+
+    def to_json(self):
+        """
+        Dump the json_ld_friendly output to a string using json.dumps
+        """
+        return json.dumps(self.jsonld_friendly(), indent=2, sort_keys=True)
+
+
+class Image(JsonObject):
+    """
+    Image object
+    """
+    def __init__(self, *args, **kwargs):
+        super(Image, self).__init__(*args, **kwargs)
+        # Do some stuff here if there's any image specific stuff. e.g. validation or normalisation of values.
+
+
+class Collection(JsonObject):
+    """
+    Collection object.
+
+    Will set the context and the type.
+    """
+    def __init__(self, *args, **kwargs):
+        super(Collection, self).__init__(*args, **kwargs)
+        # Do some stuff here if there's any collection specific stuff, e.g. validation or normalisation of values.
+        self.clean_dict["type"] = "Collection"
+        self.clean_dict["context"] = "http://www.w3.org/ns/hydra/context.jsonld"
+        if hasattr(self, "member"):
+            if self.member is None:
+                self.clean_dict["total_items"] = 0
             else:
-                new_key = k
-            if v is not None and v is not "":
-                if k in mapping.keys():
-                    new_dict[mapping[new_key]] = dict_to_jsonld_friendly(v, mapping=mapping)
-                else:
-                    new_dict[new_key] = dict_to_jsonld_friendly(v, mapping=mapping)
-    else:
-        return source
-    return new_dict
+                self.clean_dict["total_items"] = len(self.member)
+        else:
+            self.clean_dict["total_items"] = 0
 
 
-def make_collection(
-    members,
-    context="http://www.w3.org/ns/hydra/context.jsonld",
-    to_jsonld_friendly=True,
-):
-    """
-
-    :param members:
-    :param context:
-    :param to_jsonld_friendly: Boolean, if true transform to json-ld friendly form.
-    :return:
-    """
-    collection_dict = dict(type="Collection", context=context, members=members)
-    if members:
-        if len(members) > 0:
-            collection_dict["total_items"] = len(members)
-    if to_jsonld_friendly:
-        return dict_to_jsonld_friendly(source=collection_dict, mapping=key_mapping)
-    else:
-        return collection_dict
 
 
-r = requests.get(
-    "https://presley.dlcs-ida.org/iiif/idatest01/_roll_M-1011_174_cvs-948-1001/manifest"
-)
-if r.status_code == requests.codes.ok:
-    j = r.json()
-    print(json.dumps(dict_to_jsonld_friendly(j, mapping=key_mapping), indent=2))
+
+
+
+
+
+
