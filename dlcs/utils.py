@@ -76,19 +76,24 @@ def csv_to_json(csv_file, mappings, excludes):
     Portal UI into Collection JSON that can be used via the DLCS APIs.
 
     :param csv_file:
+    :param mappings: list of mappings for keys. Mappings are dicts with {"old_key: "new_key"} pairs.
+    :param excludes: list of lists for excludes for keys, e.g. ["exclude_me", "exclude_me_too"]
     :return:
     """
     if os.path.exists(csv_file):
         if os.path.isfile(csv_file):
-            if os.access(csv_file, os.R_OK) :
+            if os.access(csv_file, os.R_OK):  # we have a readable file
                 with open(csv_file) as f:
                     csv_doc = csv.DictReader(f)
+                    # convert to tuples, and run through the dict transformation
                     csv_rows = [dict_to_jsonld_friendly(source=dict(d), mappings=mappings,
                                                         excludes=excludes)
                                 for d in csv_doc]
                     if csv_rows:
                         collection = make_collection(members=csv_rows)
                         if collection:
+                            # this bit is sort of redundant, but we might want to also transform
+                            # some of the keys in the collection dict.
                             return dict_to_jsonld_friendly(source=collection,
                                                            mappings=mappings,
                                                            excludes=excludes)
